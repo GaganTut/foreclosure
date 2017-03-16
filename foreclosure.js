@@ -17,7 +17,7 @@ function loan() {
   };
 
   function missPayment() {
-    account.defaulted += 1;
+    account.defaulted ++;
     if (account.defaulted >= account.defaultsToForeclose) {
       account.foreclosed = true;
     }
@@ -28,7 +28,7 @@ function loan() {
   }
 
   function receivePayment(amount) {
-    if (amount <= account.monthlyPayment) {
+    if (amount < account.monthlyPayment) {
       missPayment();
     }
     account.balance -= amount;
@@ -61,12 +61,12 @@ function borrower(loan) {
     return account.funds;
   }
 
-  function makePayment() {
-    if (account.funds >= loan.getMonthlyPayment()) {
+  function makePayment () {
+    if (account.funds > loan.getMonthlyPayment()) {
       account.funds -= loan.getMonthlyPayment();
       loan.receivePayment(loan.getMonthlyPayment());
     } else {
-      account.loan.receivePayment(loan.getMonthlyPayment());
+      loan.receivePayment(account.funds);
       account.funds = 0;
     }
   }
@@ -87,9 +87,11 @@ steve = borrower(stevesLoan);
 
 while (stevesLoan.isForeclosed() === false) {
   steve.payDay();
-  console.log(steve.getFunds());
   steve.makePayment();
-  console.log(steve.getFunds());
-  month ++;
+  month++;
+  if (stevesLoan.getBalance() <= 0) {
+    break;
+  }
 }
 
+monthsUntilEvicted = month;
